@@ -1,0 +1,3 @@
+<script src="{% static 'js/amazon-cognito-auth.min.js' %}"></script>
+<!-- optional: only if you use other AWS services -->
+<script src="/path/to/aws-sdk-2.6.10.js"></script>
