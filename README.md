@@ -18,8 +18,8 @@ Features
 Contribute
 ----------
 
-- Issue Tracker: github.com/$project/zoomdonor/issues
-- Source Code: github.com/$project/$project
+- Issue Tracker: https://github.com/nrao57/ZoomDonor/issues
+- Source Code: https://github.com/nrao57/ZoomDonor
 
 Support
 -------
