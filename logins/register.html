@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>ZoomDonor Registration</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/signin.css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> <!--this is important-->
+  <script src="amazon-cognito-auth.min.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script> <!--this is important-->
+  
+  <!--How to use cognito is at https://github.com/aws/aws-amplify/tree/master/packages/amazon-cognito-identity-js-->
+  
+  <script src="amazon-cognito-identity.min.js"></script>  <!--this is very important-->
+
+  </head>
+
+  
+  <body class="text-center">
+
+    <form class="form-signin" method="post" id="registrationForm" >
+      <!--Icon for Login -->
+      <img class="mb-4" src="assets/bootstrap-solid.svg" alt="" width="72" height="72">
+      <h1 class="h3 mb-3 font-weight-normal" id="titleheader">Register an Account</h1>
+       <input type="email" class="form-control" id="emailInputRegister" placeholder="Email" pattern=".*" required>
+       <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password" pattern=".*" required>
+       <input type="password" class="form-control" id="password2InputRegister" placeholder="Confirm Password" pattern=".*" required>
+		<!--for verification code-->
+		<input type="hidden" id="codeInputVerify" placeholder="Verification Code" pattern=".*" required>
+       
+	   <button id="mainbutton" class="btn btn-lg btn-primary btn-block" type="button" onclick="registerButton()" >Register</button>
+	  
+	  <!--Need to add code for resending verification-->
+  
+	  <p class="mt-5 mb-3 text-muted">&copy; 2018-2019</p>
+    </form>
+
+
+	<script>
+		
+		var username;
+		var password;
+		var poolData;
+	
+	
+	  function registerButton() {
+			
+		username = document.getElementById("emailInputRegister").value;
+		password =  document.getElementById("passwordInputRegister").value;	
+		
+		poolData = {
+				UserPoolId : 'us-east-1_1v9ATpWph', // Your user pool id here
+				ClientId : '4lskkp5jn5b0ru8048ag5m88d7' // Your client id here
+			};		
+		
+		var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+
+		var attributeList = [];
+
+		var dataEmail = {
+			Name : 'email', 
+			Value : username, //get from form field
+		};
+
+		var dataPhoneNumber = { //not needed for our application
+			Name : 'phone_number', //sdfsdfsd
+			Value : '+15555555555' //sdfsdfsdf
+		};
+		
+		var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+		//var attributePhoneNumber = new AmazonCognitoIdentity.CognitoUserAttribute(dataPhoneNumber);
+
+		attributeList.push(attributeEmail);
+		//attributeList.push(attributePhoneNumber);
+
+		userPool.signUp(username, password, attributeList, null, function(err, result){
+			if (err) {
+				alert(err.message || JSON.stringify(err));
+				return;
+			}
+			cognitoUser = result.user;
+			console.log('user name is ' + cognitoUser.getUsername());
+			//change elements of page
+			document.getElementById("titleheader").innerHTML = "Enter your verification code";
+			var pass1 = document.getElementById("passwordInputRegister");
+			pass1.type="hidden";
+			var pass2 = document.getElementById("password2InputRegister");
+			pass2.type="hidden";
+			var vCode = document.getElementById("codeInputVerify");
+			vCode.type="text";
+			var emailfield = document.getElementById("emailInputRegister");
+			emailfield.type="hidden"
+			//change name and action of registerButton
+			var mButt = document.getElementById("mainbutton");
+			mButt.innerHTML="Verify";
+			mButt.onclick = verifyButton;
+			
+		});
+	  }
+ 
+ 
+	function verifyButton() {	
+		var verificationCode = document.getElementById("codeInputVerify").value;
+
+		var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+		var userData = {
+			Username : username,
+			Pool : userPool
+		};
+
+		var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+		cognitoUser.confirmRegistration(verificationCode, true, function(err, result) {
+			if (err) {
+				alert(err.message || JSON.stringify(err));
+				return;
+			} 
+			
+			location.href='thanks_in.html';
+			console.log('call result: ' + result);
+		});
+		
+		
+		
+		 cognitoUser.resendConfirmationCode(function(err, result) {
+			if (err) {
+				alert(err.message || JSON.stringify(err));
+				return;
+			}
+			console.log('call result: ' + result);
+		});
+		
+	}
+ 
+ 
+	</script>
+ 
+ </body>
+  
+</html>
+
+
+
+
+
+
+
+

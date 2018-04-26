@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Dashboard Signin</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/signin.css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> <!--this is important-->
+  <script src="amazon-cognito-auth.min.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script> <!--this is important-->
+  
+  <!--How to use cognito is at https://github.com/aws/aws-amplify/tree/master/packages/amazon-cognito-identity-js-->
+  <script src="amazon-cognito-identity.min.js"></script>  <!--this is very important-->
+  
+  <script src="config.js"></script>
+
+  </head>
+
+  
+  <body class="text-center">
+
+    <form class="form-signin" method="post" action="" >
+
+      <!--Icon for Login -->
+      <img class="mb-4" src="assets/bootstrap-solid.svg" alt="" width="72" height="72">
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+	<!-- Input Fields-->
+      <input type="text" id="inputUsername" class="form-control" placeholder="Email address" name="username" required autofocus>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" name="password" required>    
+
+      <div class="checkbox mb-3">
+        <label>
+          <input type="checkbox" value="remember-me"> Remember me
+        </label>
+      </div>    
+      
+      <button class="btn btn-lg btn-primary btn-block" type="button" onclick="signInButton()" >Sign in</button>
+
+      <p></p>
+	  <!--NEED TO ADD A LINK TO REGISTER PAGE -->
+      <a href="register.html">New User?</a>
+
+      <p class="mt-5 mb-3 text-muted">&copy; 2018-2019</p>
+    </form>
+<script>
+
+  function signInButton() {
+    
+	var authenticationData = {
+        Username : document.getElementById("inputUsername").value,
+        Password : document.getElementById("inputPassword").value,
+    };
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    var poolData = {
+        UserPoolId : _config.cognito.userPoolId, // Your user pool id here
+        ClientId : _config.cognito.clientId, // Your client id here
+    };
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    var userData = {
+        Username : document.getElementById("inputUsername").value,
+        Pool : userPool,
+    };
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+            console.log('access token + ' + result.getAccessToken().getJwtToken());
+
+            //POTENTIAL: Region needs to be set if not already set previously elsewhere.
+            AWS.config.region = _.config.cognito.region;
+
+            AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                IdentityPoolId : _config.cognito.identityPoolId, // your identity pool id here
+                Logins : {
+                    // Change the key below according to the specific region your user pool is in.
+                    'cognito-idp.us-east-1.amazonaws.com/us-east-1_1v9ATpWph' : result.getIdToken().getJwtToken()
+                }
+            });
+
+            //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
+            AWS.config.credentials.refresh((error) => {
+                if (error) {
+                     console.error(error);
+                } else {
+                     // Instantiate aws sdk service objects now that the credentials have been updated.
+                     // example: var s3 = new AWS.S3();
+                     console.log('Successfully logged!');
+						
+                }  //close outs
+            });
+        },
+
+        onFailure: function(err) {
+            alert(err.message || JSON.stringify(err));
+        },
+
+    });
+  
+  
+  }
+  
+  
+  
+</script>
+  </body>
+  
+</html>
+
+
+
+
+
+
+
+

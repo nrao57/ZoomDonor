@@ -7,6 +7,7 @@ select yn in "Yes" "No"; do
 		aws s3 cp homepage.html s3://www.zoomdonor.com;
 		aws s3 cp features.html s3://www.zoomdonor.com;
 		aws s3 cp pricing.html s3://www.zoomdonor.com;
+		aws s3 cp contact.html s3://www.zoomdonor.com;
                 break;;
         No ) exit;;
     esac
